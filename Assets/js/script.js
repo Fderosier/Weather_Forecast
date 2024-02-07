@@ -1,281 +1,208 @@
-// variabes
-const button = document.getElementById('search');
-const cityName = document.getElementById('input');
-const buttons = document.getElementById('list');
-const listedCities = document.querySelector('names');
+const apiKey = "5c243c019d1a5677d5ece7969ddd932a";
+const getUserCity = document.getElementById('city');
+const formEl = document.getElementById("city-search");
+let localCity, temp, feelsLike, humidity, cityName, lat, lon
 
-// primary function which handles api fetches 
-function main(event) {
+function geoLocate(city) {
+    let cityUrl = "https://api.openweathermap.org/geo/1.0/direct?q=" + city + "&limit=1&appid=" + apiKey
+    console.log(cityUrl)
+    fetch(cityUrl)
+        .then(function (response) {
+
+            return response.json()
+        })
+        .then(function (localCity) {
+
+            cityApiResults = localCity
+            console.log(localCity)
+
+            lat = localCity[0].lat
+            lon = localCity[0].lon
+
+            console.log(lat, lon)
+
+            return fetch(`https://api.openweathermap.org/data/2.5/weather?units=imperial&lat=${lat}&lon=${lon}&appid=${apiKey}`)
+        })
+        .then(function (response) {
+
+            return response.json()
+
+        })
+
+        .then(function (cityWeather) {
+            let temp = cityWeather.main.temp;
+            let feelsLike = cityWeather.main.feels_like;
+            let humidity = cityWeather.main.humidity;
+            let cityName = cityWeather.name;
+            let windSpeed = cityWeather.wind.speed
+            let weatherIcon = cityWeather.weather[0].icon
+            let icon = "https://openweathermap.org/img/wn/" + weatherIcon + "@2x.png"
+            // THIS ALSO NEEDS DAY.JS - BE BETTER
+            console.log(cityWeather)
+
+            displayWeatherInfo(temp, feelsLike, humidity, cityName, icon, windSpeed);
+
+            return fetch(`https://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=${lat}&lon=${lon}&appid=${apiKey}`)
+        })
+        .then(function (response) {
+
+            console.log(response)
+            return response.json()
+
+        })
+        .then(function (fiveDay) {
+            let fiveDayTemps = [];
+            let fiveDayHumidities = [];
+            let fiveDayWindSpeeds = [];
+            let fiveDayIcons = [];
+            let fiveDayDates = [];
+
+            console.log(fiveDay);
+
+            for (let i = 0; i < 6; i++) {
+                const forecast = fiveDay.list[i];
+                const temperature = forecast.main.temp;
+                const humidity = forecast.main.humidity
+                const windSpeed = forecast.wind.speed
+                const icons = "https://openweathermap.org/img/wn/" + forecast.weather[0].icon + "@2x.png"
+                const date = dayjs(forecast.dt_txt).format('MMMM D, YYYY');
+
+                fiveDayTemps.push(temperature);
+                fiveDayHumidities.push(humidity);
+                fiveDayWindSpeeds.push(windSpeed);
+                fiveDayIcons.push(icons)
+                fiveDayDates.push(date)
+
+                console.log(fiveDayTemps);
+                console.log(fiveDayHumidities);
+                console.log(fiveDayWindSpeeds);
+                console.log(fiveDayIcons);
+                console.log(fiveDayDates)
+
+                displayFiveDay(fiveDayHumidities, fiveDayWindSpeeds, fiveDayIcons, fiveDayTemps, fiveDayDates)
+            }
+        })
+
+
+        .catch(function (error) {
+            console.error("Error fetching data:", error);
+        
+            displayError("Unable to fetch weather data. Please try again.");
+        });
+
+}
+
+function displayWeatherInfo(temp, feelsLike, humidity, cityName, icon, windSpeed,) {
+    const weatherContainer = document.querySelector(".card-body");
+    var today = dayjs().format('MMM D, YYYY');
+
+    weatherContainer.innerHTML = `
+        <h4 class="mb-1 sfw-normal">${cityName}<br>${(today)}</h4>
+        <p class="mb-2">Current temperature: <strong>${temp} °F</strong></p>
+        <p>Feels like: <strong>${feelsLike} °F</strong></p>
+        <p>Humidity: <strong>${humidity}%</strong></p>
+        <p>Wind Speed: <strong>${windSpeed} MPH </strong></p>
+
+        <div class="d-flex flex-row align-items-center">
+            <p class="mb-0 me-4"><img src=${icon}></p>
+            <i class="fas fa-cloud fa-3x" style="color: #eee;"></i>
+        </div>
+    `;
+}
+
+
+function displayFiveDay(fiveDayHumidities, fiveDayWindSpeeds, fiveDayIcons, fiveDayTemps, fiveDayDates) {
+    const fiveDayConatiner = document.querySelector(".py-5")
+
+    fiveDayConatiner.innerHTML = `
+    <div class="d-flex justify-content-between">
+    <div class="forecast-container">
+      <div class="forecast-box">
+      <p> <strong> ${fiveDayDates[1]} </strong> </p>
+      <p>Temp: <strong> ${fiveDayTemps[0]}</strong> </p>
+      <p>Humidity: <strong>${fiveDayHumidities[0]}%</strong></p>
+      <p>Wind Speed: <strong>${fiveDayWindSpeeds[0]} MPH</strong> </p>
+      <p><img src=${fiveDayIcons[0]}> </p>
+      </div>
+      <div class="forecast-box">
+      <p> <strong> ${fiveDayDates[2]} </strong> </p>
+      <p>Temp: <strong>${fiveDayTemps[1]}</strong> </p>
+      <p>Humidity:<strong> ${fiveDayHumidities[1]}%</strong></p>
+      <p>Wind Speed:<strong> ${fiveDayWindSpeeds[1]} MPH</strong> </p>
+      <p> <img src=${fiveDayIcons[1]}> </p>
+      </div>
+      <div class="forecast-box">
+      <p> <strong> ${fiveDayDates[3]} </strong> </p>
+      <p>Temp:<strong> ${fiveDayTemps[2]}</strong> </p>
+      <p>Humidity:<strong> ${fiveDayHumidities[2]}%</strong></p>
+      <p>Wind Speed:<strong> ${fiveDayWindSpeeds[2]} MPH </strong></p>
+      <p> <img src=${fiveDayIcons[2]}> </p>
+      </div>
+      <div class="forecast-box">
+      <p> <strong> ${fiveDayDates[4]} </strong> </p>
+      <p>Temp:<strong> ${fiveDayTemps[3]}</strong> </p>
+      <p>Humidity:<strong> ${fiveDayHumidities[3]}%</strong></p>
+      <p>Wind Speed:<strong> ${fiveDayWindSpeeds[3]} MPH </strong></p>
+      <p><img src=${fiveDayIcons[3]}> </p>
+      </div>
+      <div class="forecast-box">
+      <p> <strong> ${fiveDayDates[5]} </strong> </p>
+      <p>Temp:<strong> ${fiveDayTemps[4]} </strong></p>
+      <p>Humidity:<strong> ${fiveDayHumidities[4]}%</strong></p>
+      <p>Wind Speed:<strong> ${fiveDayWindSpeeds[4]} MPH</strong> </p>
+      <p><img src=${fiveDayIcons[4]}> </p>
+      </div>
+    </div>
+  </div>`
+}
+
+function saveUserCitiesToLocalStorage(cities) {
+
+if (localStorage.getItem(cities) === null) {
+    localStorage.setItem('userCities', JSON.stringify(cities)) 
+  }
+}
+
+function createCityButtons() {
+    const userCitiesContainer = document.getElementById('userCities');
+    const userCities = JSON.parse(localStorage.getItem('userCities')) || [];
+
+
+    userCitiesContainer.innerHTML = '';
+
+
+    userCities.forEach(city => {
+        const button = document.createElement('button');
+        button.textContent = city;
+        button.classList.add('city-button');
+
+   
+        button.addEventListener('click', function() {
+         event.preventDefault();
+            geoLocate(city);
+        });
+
+     
+        userCitiesContainer.appendChild(button);
+    });
+}
+
+function displayError(message) {
+    weatherContainer.innerHTML = `<p class="error">${message}</p>`;
+}
+
+formEl.addEventListener("submit", function (event) {
     event.preventDefault();
-    const city = cityName.value;
-    getWeather();
-
-    // function gets coordinates based on city name
-    function getWeather() {
-        fetch('https://api.openweathermap.org/geo/1.0/direct?q=' + city + '&limit=3&appid=5877f230766a4bb2c1d817ba31e0ff20')
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
-                // locates coordinates of city
-                let cities = data[0].name
-                let longitude = data[0].lon;
-                let latitude = data[0].lat;
-             
-                let coordinates = latitude.toString() + " " + longitude.toString();
-                localStorage.setItem(city, coordinates);
-                // appends button to <ul> for weather recall
-                buttonElement = document.createElement('button');
-                buttonElement.setAttribute('id', cities);
-                buttonElement.setAttribute('class', 'names');
-                buttonElement.value = cities;
-                buttonElement.textContent = cities;
-                buttons.appendChild(buttonElement);
-
-                // function that fetches the weather based on coordinates
-                fetch('https://api.openweathermap.org/data/2.5/forecast?lat=' + latitude + '&lon=' + longitude + '&appid=5877f230766a4bb2c1d817ba31e0ff20&units=imperial')
-                    .then(function (response) {
-                        return response.json();
-                    })
-                    .then(function (data) {
-                        console.log(data);
-
-                        // displays city, date, and weather conditions of main card
-                        let date = dayjs()
-                        const displayCity = document.getElementById('city-name');
-                        displayCity.textContent = data.city.name;
-                        const displayDate = document.getElementById('date-main');
-                        displayDate.textContent = date.format('dddd, MMMM D, YYYY');
-
-                        const temperature = document.getElementById('temperature');
-                        temperature.textContent = 'Temperature: ' + data.list[0].main.temp + "°F";
-
-                        const humidity = document.getElementById('humidity');
-                        humidity.textContent = 'Humidity: ' + data.list[0].main.humidity + "%";
-
-                        const windSpeed = document.getElementById('wind-speed');
-                        windSpeed.textContent = 'Wind Speed: ' + data.list[0].wind.speed + " mph";
-
-                        const mainIcon = document.getElementById('main-icon');
-                        mainIcon.src = href = 'https://openweathermap.org/img/wn/' + data.list[0].weather[0].icon + '@2x.png';
-                        const iconCard = document.getElementById('icon-card');
-                        iconCard.classList.add("bg-color");
-                        let mainWeather = document.getElementById('main-weather');
-                        mainWeather.classList.add('border');
-
-                        const iconDescription = document.getElementById('description');
-                        iconDescription.textContent = data.list[0].weather[0].description;
-
-                        const forecast = document.getElementById('fiveday');
-                        forecast.textContent = "5-Day Forecast";
-
-                        // establishes dates of five-day forecast cards
-                        const dayOne = date.add(1, 'day');
-                        const dayTwo = date.add(2, 'day');
-                        const dayThree = date.add(3, 'day');
-                        const dayFour = date.add(4, 'day');
-                        const dayFive = date.add(5, 'day');
-
-                        // displays dates of five-day forecast
-                        const dateOne = document.getElementById('day-one');
-                        dateOne.textContent = dayOne.format('MM/DD/YYYY');
-                        const dateTwo = document.getElementById('day-two');
-                        dateTwo.textContent = dayTwo.format('MM/DD/YYYY');
-                        const dateThree = document.getElementById('day-three');
-                        dateThree.textContent = dayThree.format('MM/DD/YYYY');
-                        const dateFour = document.getElementById('day-four');
-                        dateFour.textContent = dayFour.format('MM/DD/YYYY');
-                        const dateFive = document.getElementById('day-five');
-                        dateFive.textContent = dayFive.format('MM/DD/YYYY');
-
-
-                        // displays weather icon for five-day forecast
-                        const iconOne = document.getElementById('img1');
-                        iconOne.src = href = 'https://openweathermap.org/img/wn/' + data.list[5].weather[0].icon + '@2x.png';
-                        iconOne.classList.add("bg-color");
-                        const iconTwo = document.getElementById('img2');
-                        iconTwo.src = href = 'https://openweathermap.org/img/wn/' + data.list[13].weather[0].icon + '@2x.png';
-                        iconTwo.classList.add("bg-color");
-                        const iconThree = document.getElementById('img3');
-                        iconThree.src = href = 'https://openweathermap.org/img/wn/' + data.list[21].weather[0].icon + '@2x.png';
-                        iconThree.classList.add("bg-color");
-                        const iconFour = document.getElementById('img4');
-                        iconFour.src = href = 'https://openweathermap.org/img/wn/' + data.list[29].weather[0].icon + '@2x.png';
-                        iconFour.classList.add("bg-color");
-                        const iconFive = document.getElementById('img5');
-                        iconFive.src = href = 'https://openweathermap.org/img/wn/' + data.list[37].weather[0].icon + '@2x.png';
-                        iconFive.classList.add("bg-color");
-
-                        // displays temperatures for five-day forecast
-                        const temp1 = document.getElementById('temp1');
-                        temp1.textContent = 'Temperature: ' + data.list[5].main.temp + "°F";
-                        const temp2 = document.getElementById('temp2');
-                        temp2.textContent = 'Temperature: ' + data.list[13].main.temp + "°F";
-                        const temp3 = document.getElementById('temp3');
-                        temp3.textContent = 'Temperature: ' + data.list[21].main.temp + "°F";
-                        const temp4 = document.getElementById('temp4');
-                        temp4.textContent = 'Temperature: ' + data.list[29].main.temp + "°F";
-                        const temp5 = document.getElementById('temp5');
-                        temp5.textContent = 'Temperature: ' + data.list[37].main.temp + "°F";
-
-                        // displays humidity for five-day forecast
-                        const hum1 = document.getElementById('hum1');
-                        hum1.textContent = 'Humidity: ' + data.list[5].main.humidity + "%";
-                        const hum2 = document.getElementById('hum2');
-                        hum2.textContent = 'Humidity: ' + data.list[13].main.humidity + "%";
-                        const hum3 = document.getElementById('hum3');
-                        hum3.textContent = 'Humidity: ' + data.list[21].main.humidity + "%";
-                        const hum4 = document.getElementById('hum4');
-                        hum4.textContent = 'Humidity: ' + data.list[29].main.humidity + "%";
-                        const hum5 = document.getElementById('hum5');
-                        hum5.textContent = 'Humidity: ' + data.list[37].main.humidity + "%";
-
-                        // displays wind speed for five-day forecast
-                        const ws1 = document.getElementById('ws1');
-                        ws1.textContent = 'Wind Speed: ' + data.list[5].wind.speed + " mph";
-                        const ws2 = document.getElementById('ws2');
-                        ws2.textContent = 'Wind Speed: ' + data.list[13].wind.speed + " mph";
-                        const ws3 = document.getElementById('ws3');
-                        ws3.textContent = 'Wind Speed: ' + data.list[21].wind.speed + " mph";
-                        const ws4 = document.getElementById('ws4');
-                        ws4.textContent = 'Wind Speed: ' + data.list[29].wind.speed + " mph";
-                        const ws5 = document.getElementById('ws5');
-                        ws5.textContent = 'Wind Speed: ' + data.list[37].wind.speed + " mph";
-
-                    })
-            })
-        // resets text entry
-        form.reset();
+    const userCity = getUserCity.value;
+    const existingUserCities = JSON.parse(localStorage.getItem('userCities')) || [];
+    if (!existingUserCities.includes(userCity)) {
+        existingUserCities.push(userCity);
+        saveUserCitiesToLocalStorage(existingUserCities);
+        createCityButtons();
     }
-}
 
-// function that handles the call to and display from local storage from button list event listener
-function recallCity(event) {
-    // matches value of clicked button to local storage key and sets array
-    let savedCities = event.target.value;
-    for (let i = 0; i < localStorage.length; i++) {
-        if (localStorage.key(i).toLowerCase() == savedCities.toLowerCase()) {
-            let savedCoordinates = localStorage.getItem(savedCities.toLowerCase());
-            let coordinateArray = savedCoordinates.split(" ");
-            let latitude = coordinateArray[0];
-            let longitude = coordinateArray[1];
+    geoLocate(userCity);
+});
+    
 
-            // fetches weather from coordinates established in above array and displays - see commetns from function main()
-            fetch('https://api.openweathermap.org/data/2.5/forecast?lat=' + latitude + '&lon=' + longitude + '&appid=5877f230766a4bb2c1d817ba31e0ff20&units=imperial')
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (data) {
-                    console.log(data);
-
-                    // displays city, date, and weather conditions of main card
-                    let date = dayjs()
-                    const displayCity = document.getElementById('city-name');
-                    displayCity.textContent = data.city.name;
-                    const displayDate = document.getElementById('date-main');
-                    displayDate.textContent = date.format('dddd, MMMM D, YYYY');
-
-                    const temperature = document.getElementById('temperature');
-                    temperature.textContent = 'Temperature: ' + data.list[0].main.temp + "°F";
-
-                    const humidity = document.getElementById('humidity');
-                    humidity.textContent = 'Humidity: ' + data.list[0].main.humidity + "%";
-
-                    const windSpeed = document.getElementById('wind-speed');
-                    windSpeed.textContent = 'Wind Speed: ' + data.list[0].wind.speed + " mph";
-
-                    const mainIcon = document.getElementById('main-icon');
-                    mainIcon.src = href = 'https://openweathermap.org/img/wn/' + data.list[0].weather[0].icon + '@2x.png';
-                    const iconCard = document.getElementById('icon-card');
-                    iconCard.classList.add("bg-color");
-                    let mainWeather = document.getElementById('main-weather');
-                    mainWeather.classList.add('border');
-
-                    const iconDescription = document.getElementById('description');
-                    iconDescription.textContent = data.list[0].weather[0].description;
-
-                    const forecast = document.getElementById('fiveday');
-                    forecast.textContent = "5-Day Forecast";
-
-                    // establishes dates of five-day forecast cards
-                    const dayOne = date.add(1, 'day');
-                    const dayTwo = date.add(2, 'day');
-                    const dayThree = date.add(3, 'day');
-                    const dayFour = date.add(4, 'day');
-                    const dayFive = date.add(5, 'day');
-
-                    // displays dates of five-day forecast
-                    const dateOne = document.getElementById('day-one');
-                    dateOne.textContent = dayOne.format('MM/DD/YYYY');
-                    const dateTwo = document.getElementById('day-two');
-                    dateTwo.textContent = dayTwo.format('MM/DD/YYYY');
-                    const dateThree = document.getElementById('day-three');
-                    dateThree.textContent = dayThree.format('MM/DD/YYYY');
-                    const dateFour = document.getElementById('day-four');
-                    dateFour.textContent = dayFour.format('MM/DD/YYYY');
-                    const dateFive = document.getElementById('day-five');
-                    dateFive.textContent = dayFive.format('MM/DD/YYYY');
-
-
-                    // displays weather icon for five-day forecast
-                    const iconOne = document.getElementById('img1');
-                    iconOne.src = href = 'https://openweathermap.org/img/wn/' + data.list[5].weather[0].icon + '@2x.png';
-                    iconOne.classList.add("bg-color");
-                    const iconTwo = document.getElementById('img2');
-                    iconTwo.src = href = 'https://openweathermap.org/img/wn/' + data.list[13].weather[0].icon + '@2x.png';
-                    iconTwo.classList.add("bg-color");
-                    const iconThree = document.getElementById('img3');
-                    iconThree.src = href = 'https://openweathermap.org/img/wn/' + data.list[21].weather[0].icon + '@2x.png';
-                    iconThree.classList.add("bg-color");
-                    const iconFour = document.getElementById('img4');
-                    iconFour.src = href = 'https://openweathermap.org/img/wn/' + data.list[29].weather[0].icon + '@2x.png';
-                    iconFour.classList.add("bg-color");
-                    const iconFive = document.getElementById('img5');
-                    iconFive.src = href = 'https://openweathermap.org/img/wn/' + data.list[37].weather[0].icon + '@2x.png';
-                    iconFive.classList.add("bg-color");
-
-                    // displays temperatures for five-day forecast
-                    const temp1 = document.getElementById('temp1');
-                    temp1.textContent = 'Temperature: ' + data.list[5].main.temp + "°F";
-                    const temp2 = document.getElementById('temp2');
-                    temp2.textContent = 'Temperature: ' + data.list[13].main.temp + "°F";
-                    const temp3 = document.getElementById('temp3');
-                    temp3.textContent = 'Temperature: ' + data.list[21].main.temp + "°F";
-                    const temp4 = document.getElementById('temp4');
-                    temp4.textContent = 'Temperature: ' + data.list[29].main.temp + "°F";
-                    const temp5 = document.getElementById('temp5');
-                    temp5.textContent = 'Temperature: ' + data.list[37].main.temp + "°F";
-
-                    // displays humidity for five-day forecast
-                    const hum1 = document.getElementById('hum1');
-                    hum1.textContent = 'Humidity: ' + data.list[5].main.humidity + "%";
-                    const hum2 = document.getElementById('hum2');
-                    hum2.textContent = 'Humidity: ' + data.list[13].main.humidity + "%";
-                    const hum3 = document.getElementById('hum3');
-                    hum3.textContent = 'Humidity: ' + data.list[21].main.humidity + "%";
-                    const hum4 = document.getElementById('hum4');
-                    hum4.textContent = 'Humidity: ' + data.list[29].main.humidity + "%";
-                    const hum5 = document.getElementById('hum5');
-                    hum5.textContent = 'Humidity: ' + data.list[37].main.humidity + "%";
-
-                    // displays wind speed for five-day forecast
-                    const ws1 = document.getElementById('ws1');
-                    ws1.textContent = 'Wind Speed: ' + data.list[5].wind.speed + " mph";
-                    const ws2 = document.getElementById('ws2');
-                    ws2.textContent = 'Wind Speed: ' + data.list[13].wind.speed + " mph";
-                    const ws3 = document.getElementById('ws3');
-                    ws3.textContent = 'Wind Speed: ' + data.list[21].wind.speed + " mph";
-                    const ws4 = document.getElementById('ws4');
-                    ws4.textContent = 'Wind Speed: ' + data.list[29].wind.speed + " mph";
-                    const ws5 = document.getElementById('ws5');
-                    ws5.textContent = 'Wind Speed: ' + data.list[37].wind.speed + " mph";
-
-                })
-        }
-    }
-}
-
-// event listener from the city search button
-button.addEventListener('click', main);
-// event listener from the city history buttons
-buttons.addEventListener('click', recallCity);
+createCityButtons();
