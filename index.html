@@ -2,117 +2,65 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="./assets/css/style.css" />
-    <title>Weather Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="./assets/style.css">
 </head>
 
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.3/dayjs.min.js"
+  integrity="sha256-iu/zLUB+QgISXBLCW/mcDi/rnf4m4uEDO0wauy76x7U=" crossorigin="anonymous"></script>
+
 <body>
-    <header class="display-2 mb-5 p-2 text-center">Weather Dashboard</header>
-    <main class="conatiner">
-        <section class="row">
-            <aside class="col-lg-3 col-md-8 col-lg-2 col-md-2">
-                <h3 class="text-left">SEARCH BY CITY:</h3>
-                <form id="form" class="row">
-                    <input type="text" id="input" placeholder="city" class="col-9">
-                    <button id="search" class="col-3 btn btn-primary">Submit</button>
-                </form>
-                <div>
-                    <ul id="list"></ul>
-                </div>
-            </aside>
-            <div class="col-lg-9 col-md-8 col-lg-2 col-md-2">
-                <div class="row">
-                    <div id="main-weather" class="col-9 card">
-                        <div class="card">
-                            <h2 id="city-name" class="card-title"></h2>
-                            <h3 id="date-main" class="card-subtitle"></h3>
-                            <div class="card-body">
-                                <p id="temperature"></p>
-                                <p id="humidity"></p>
-                                <p id="wind-speed"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="icon-card" class="col-3 card">
-                        <img id="main-icon" class="card-img-top">
-                        <p id="description" class="card-text"></p>
-                    </div>
-                </div>
-                <div class="row">
-                    <h2 id="fiveday"></h2>
-                </div>
-                <div class="row">
-                    <div class="col-lg col-md-8">
-                        <h4 id="day-one"></h4>
-                        <div class="card">
-                            <img id="img1" class="card-img-top">
-                            <div class="card-text">
-                                <p id="temp1"></p>
-                                <p id="hum1"></p>
-                                <p id="ws1"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg col-md-8">
-                        <h4 id="day-two"></h4>
-                        <div class="card">
-                            <img id="img2" class="card-img-top">
-                            <div class="card-text">
-                                <p id="temp2"></p>
-                                <p id="hum2"></p>
-                                <p id="ws2"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg col-md-8">
-                        <h4 id="day-three"></h4>
-                        <div class="card">
-                            <img id="img3" class="card-img-top">
-                            <div class="card-text">
-                                <p id="temp3"></p>
-                                <p id="hum3"></p>
-                                <p id="ws3"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg col-md-8">
-                        <h4 id="day-four"></h4>
-                        <div class="card">
-                            <img id="img4" class="card-img-top">
-                            <div class="card-text">
-                                <p id="temp4"></p>
-                                <p id="hum4"></p>
-                                <p id="ws4"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg col-md-8">
-                        <h4 id="day-five"></h4>
-                        <div class="card">
-                            <img id="img5" class="card-img-top">
-                            <div class="card-text">
-                                <p id="temp5"></p>
-                                <p id="hum5"></p>
-                                <p id="ws5"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+  <nav class="navbar bg-body-tertiary p-3 mb-2 bg-primary-subtle text-emphasis-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand">
+        Weather Dashboard
+      </a>
+    </div>
+  </nav>
+  <form id="city-search">
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="inputGroup-sizing-default" size="sm">Enter City Name</span>
+      <input id="city" type="text" class="form-control" aria-label="Sizing example input"
+        aria-describedby="inputGroup-sizing-default">
+      <input class="btn btn-primary" type="submit" value="Submit">
+    </div>
+  </form>
+  <!-- Below is a widget used from MDBootstrap -->
+  <section class="vh-100 weather-container card-body">
+    <!-- Content for the weather container -->
+  </section>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.3/dayjs.min.js"
-        integrity="sha256-iu/zLUB+QgISXBLCW/mcDi/rnf4m4uEDO0wauy76x7U=" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <div class="container py-5 h-100">
+    <div class="d-flex justify-content-between">
 
-    <script src="./assets/js/script.js"></script>
+      <!-- <div class="forecast-container">
+ 
+        <div class="forecast-box">
+    
+        </div>
+        <div class="forecast-box">
+  
+        </div>
+        <div class="forecast-box">
+     
+        </div>
+        <div class="forecast-box">
+      
+        </div>
+        <div class="forecast-box">
+   
+        </div>
+      </div> -->
+    </div>
+  </div>
+  <div id="userCities" class="citybuttons"></div>
+
+  <script src="./assets/script.js"></script>
 </body>
 
 </html>
