@@ -1,4 +1,5 @@
 // global variabes
+const apikey = "d3098858418f2947dbe7bbe442312431"
 const button = document.getElementById('search');
 const cityName = document.getElementById('input');
 const buttons = document.getElementById('list');
