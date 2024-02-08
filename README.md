@@ -8,7 +8,7 @@ Installation
 N/A
 
 Usage
-
+![Alt text](<Assets/Images/weather forecast.png>)
 alt text = "screenshot of weather dashboard with Portland, OR weather displayed"
 
 Credits
